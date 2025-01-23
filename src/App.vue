@@ -1,5 +1,14 @@
 <template>
-  <div class="game-container">
+  <div v-if="loading" class="loading-screen">
+    <h2>游戏加载中...</h2>
+    <el-progress 
+      :percentage="loadingProgress" 
+      :duration="3000"
+      :stroke-width="20"
+      status="success"
+    />
+  </div>
+  <div v-else class="game-container">
     <el-card class="game-card">
       <div class="header">
         <h1>森林冒险</h1>
@@ -31,11 +40,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const health = ref(100)
 const currentSceneId = ref('start')
 const gameOver = ref(false)
+const loading = ref(true)
+const loadingProgress = ref(0)
 
 const format = (percentage) => `生命值: ${percentage}%`
 
@@ -123,9 +134,44 @@ const restartGame = () => {
   currentSceneId.value = 'start'
   gameOver.value = false
 }
+
+onMounted(() => {
+  const interval = setInterval(() => {
+    loadingProgress.value += 4
+    if (loadingProgress.value >= 100) {
+      clearInterval(interval)
+      setTimeout(() => {
+        loading.value = false
+      }, 500)
+    }
+  }, 100)
+})
 </script>
 
 <style scoped>
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f7fa;
+  z-index: 1000;
+}
+
+.loading-screen h2 {
+  margin-bottom: 2rem;
+  color: #409EFF;
+}
+
+.loading-screen :deep(.el-progress) {
+  width: 300px;
+}
+
 .game-container {
   max-width: 600px;
   margin: 2rem auto;
